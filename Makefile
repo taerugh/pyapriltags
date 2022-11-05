@@ -1,5 +1,7 @@
 ROOT=$(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
+.PHONY: build upload clean release-all
+
 build:
 	# create build environment
 	docker build \
