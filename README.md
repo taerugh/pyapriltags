@@ -123,5 +123,5 @@ The building script from `assets/build.sh` will be executed inside the container
 - run cmake build
 - copy so/.dylib/.dll library file to `/dist/<arch>` (inside the container)
 - repeat above steps for: `win64`, `macos arm64`, `macos x86_64`, `linux x86_64`, `linux aarch64`, `linux armv7l`
-- ~~build python wheel (the .so library is embedded as `package_data`)~~
-- ~~copy wheel file to `/out` (will pop up in `dist/` outside the container)~~
+- build python wheel (the .so library is embedded as `package_data`)
+- copy wheel file to `/out` (will pop up in `dist/` outside the container)
