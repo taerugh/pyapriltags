@@ -1,22 +1,18 @@
-ROOT=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-PYTHON_VERSION=""
-ARCH="amd64"
+ROOT=$(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 build:
 	# create build environment
 	docker build \
-		-t ${ARCH}/dt_apriltags:wheel-python${$PYTHON_VERSION} \
-		--build-arg ARCH="${ARCH}" \
-		--build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
+		-t dt_apriltags:wheel-python3 \
 		${ROOT}
 	# create wheel destination directory
 	mkdir -p ${ROOT}/dist
 	# build wheel
 	docker run \
 		-it --rm \
-		-v ${ROOT}:/source \
+		-v ${ROOT}:/apriltag \
 		-v ${ROOT}/dist:/out \
-		${ARCH}/dt_apriltags:wheel-python${$PYTHON_VERSION}
+		dt_apriltags:wheel-python3
 
 upload:
 	twine upload ${ROOT}/dist/*
@@ -25,17 +21,7 @@ clean:
 	rm -rf ${ROOT}/dist/*
 
 release-all:
-	# Python2
+	# build wheels
 	make build
-	# Python3
-	make build PYTHON_VERSION=3
-	# Python2
-	make build ARCH=arm32v7
-	# Python3
-	make build ARCH=arm32v7 PYTHON_VERSION=3
-	# Python2
-	make build ARCH=arm64v8
-	# Python3
-	make build ARCH=arm64v8 PYTHON_VERSION=3
 	# push wheels
 	make upload

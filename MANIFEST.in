@@ -1,1 +1,3 @@
 include dt_apriltags/libapriltag.so
+include dt_apriltags/libapriltag.dylib
+include dt_apriltags/libapriltag.dll

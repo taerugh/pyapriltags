@@ -1,42 +1,37 @@
-ARG PYTHON_VERSION="PYTHON_VERSION_NOT_SET"
-ARG ARCH="ARCH_NOT_SET"
+# syntax=docker/dockerfile:1
 
-FROM ${ARCH}/ubuntu:18.04
+# get OSX SDK
+ARG OSXCROSS_VERSION=latest
+FROM crazymax/osxcross:${OSXCROSS_VERSION}-ubuntu AS osxcross
 
-ARG ARCH
-ARG PYTHON_VERSION
-ENV QEMU_EXECVE 1
+FROM ubuntu
+ENV PATH="/osxcross/bin:$PATH"
+ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
+COPY --from=osxcross /osxcross /osxcross
 
-# copy QEMU
-COPY ./assets/qemu/${ARCH}/ /usr/bin/
+ARG DEBIAN_FRONTEND=noninteractive
+# install most the compilers needed for all targets
+RUN apt-get update && apt-get install -y clang lld libc6-dev \
+    cmake make libtool gcc g++ \
+    gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 \
+    gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+    python3-pip
 
-# install python and cmake
-RUN apt-get update && \
-  apt-get install -y \
-    python${PYTHON_VERSION} \
-    python${PYTHON_VERSION}-pip \
-    cmake
-
-# install cython (needed by bdist_wheel for numpy)
-RUN pip${PYTHON_VERSION} install \
-    cython
+# install the remaining compiler dependent on the container architecture
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
+        apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu; \
+    else \
+        apt-get install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu; \
+    fi
 
 # install python libraries
-RUN pip${PYTHON_VERSION} install \
-    setuptools \
-    numpy \
-    bdist-wheel-name \
-    wheel>=0.31.0
+RUN pip install numpy
+
+# support from win7 in mingw
+ENV CXXFLAGS="-DWINVER=0x0600 -D_WIN32_WINNT=0x0600"
 
 # install building script
 COPY ./assets/build.sh /build.sh
-
-# prepare environment
-ENV ARCH=${ARCH}
-ENV PYTHON_VERSION=${PYTHON_VERSION}
-RUN mkdir /source
-RUN mkdir /out
-WORKDIR /source
 
 # define command
 CMD /build.sh
