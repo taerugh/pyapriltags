@@ -17,6 +17,7 @@ from __future__ import print_function
 
 import ctypes
 import os
+import sys
 
 import numpy
 
@@ -229,11 +230,15 @@ class Detector(object):
         self.params['debug'] = debug
 
         # detect OS to get extension for DLL
-        uname0 = os.uname()[0]
-        if uname0 == 'Darwin':
-            extension = '.dylib'
-        else:
+        platform = sys.platform
+        if platform.startswith('linux'):
             extension = '.so'
+        elif platform.startswith('darwin'):
+            extension = '.dylib'
+        elif platform == 'win32':
+            extension = '.dll'
+        else:
+            raise NotImplementedError(f"The platform {platform} is not supported")
 
         filename = 'libapriltag' + extension
 
