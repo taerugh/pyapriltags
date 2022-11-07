@@ -9,13 +9,13 @@ tags.
 Original author: Isaac Dulin, Spring 2016
 Updates: Matt Zucker, Fall 2016
 Apriltags 3 version: Aleksandar Petrov, Spring 2019
-Current maintainer: Andrea F. Daniele
+Current maintainer: Will Barber
 
 """
 import ctypes
 import os
 import sys
-from typing import Optional, NamedTuple
+from typing import List, Optional, NamedTuple
 
 import numpy
 
@@ -206,14 +206,14 @@ class Detector(object):
     """
 
     def __init__(self,
-                 families='tag36h11',
-                 nthreads=1,
-                 quad_decimate=2.0,
-                 quad_sigma=0.0,
-                 refine_edges=1,
-                 decode_sharpening=0.25,
-                 debug=0,
-                 searchpath=['apriltags', '.', dir_path]):
+                 families: str='tag36h11',
+                 nthreads: int=1,
+                 quad_decimate: float=2.0,
+                 quad_sigma: float=0.0,
+                 refine_edges: int=1,
+                 decode_sharpening: float=0.25,
+                 debug: int=0,
+                 searchpath: List[str]=['apriltags', '.', dir_path]):
 
         # Parse the parameters
         self.params = dict()
@@ -348,7 +348,10 @@ class Detector(object):
                     self.libc.tagStandard52h13_destroy.restype = None
                     self.libc.tagStandard52h13_destroy(tf)
 
-    def detect(self, img, estimate_tag_pose=False, camera_params=None, tag_size=None):
+    def detect(
+        self, img: numpy.ndarray, estimate_tag_pose: bool=False,
+        camera_params: Optional[numpy.ndarray]=None, tag_size: Optional[float]=None,
+    ) -> List[Detection]:
         """
         Run detectons on the provided image. The image must be a grayscale
         image of type numpy.uint8.
@@ -379,10 +382,10 @@ class Detector(object):
             corners = numpy.ctypeslib.as_array(tag.p, shape=(4, 2)).copy()
 
             if estimate_tag_pose:
-                if camera_params == None:
+                if camera_params is None:
                     raise Exception(
                         'camera_params must be provided to detect if estimate_tag_pose is set to True')
-                if tag_size == None:
+                if tag_size is None:
                     raise Exception(
                         'tag_size must be provided to detect if estimate_tag_pose is set to True')
 
