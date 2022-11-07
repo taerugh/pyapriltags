@@ -1,6 +1,8 @@
-# lib-dt-apriltags: Python bindings for the Apriltags library
+# pyapriltags: Python bindings for the Apriltags library
 
-These are Python bindings for the [Apriltags 3](https://github.com/AprilRobotics/apriltags) library developed by [AprilRobotics](https://april.eecs.umich.edu/). Inspired by the [Apriltags2 bindings](https://github.com/swatbotics/apriltag) by [Matt Zucker](https://github.com/mzucker).
+These are Python bindings for the [Apriltags 3](https://github.com/AprilRobotics/apriltags) library developed by [AprilRobotics](https://april.eecs.umich.edu/).
+Inspired by the [Apriltags2 bindings](https://github.com/swatbotics/apriltag) by [Matt Zucker](https://github.com/mzucker).
+Forked from [dt-apriltags](https://github.com/duckietown/lib-dt-apriltags).
 
 The original library is published with a [BSD 2-Clause license](https://github.com/AprilRobotics/apriltag/blob/master/LICENSE.md).
 
@@ -9,12 +11,12 @@ The original library is published with a [BSD 2-Clause license](https://github.c
 ### The easy way
 You can install using `pip` (or `pip3` for Python 3):
 ```
-pip install dt-apriltags
+pip install pyapriltags
 ```
 
 And if you want a particular release, add it like this:
 ```
-pip install dt-apriltags@v3.1.1
+pip install pyapriltags@v3.3.0
 ```
 
 ### Build it yourself
@@ -33,7 +35,7 @@ $ make build
 The new wheel will be available in the directory `dist/`.
 You can now install the wheel
 ```
-pip install dt_apriltags-VERSION-py3-none-ARCH.whl
+pip install pyapriltags-VERSION-py3-none-ARCH.whl
 ```
 NOTE: based on the current `VERSION` of this library and your OS, together with the architecture of your CPU `ARCH`, the filename above varies.
 

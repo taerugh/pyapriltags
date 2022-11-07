@@ -21,10 +21,10 @@ do_compile() {
 }
 
 build_wheel() {
-    cp /dist/$1/$2 dt_apriltags/
+    cp /dist/$1/$2 pyapriltags/
     pip wheel --wheel-dir /out --no-deps --build-option=--plat-name=$3 .
     rm -rf build/lib  # remove cached shared libraries
-    rm dt_apriltags/$2
+    rm pyapriltags/$2
 }
 
 do_compile win64 x86_64-w64-mingw32-gcc x86_64-w64-mingw32-g++ "-DCMAKE_SYSTEM_NAME=Windows"
