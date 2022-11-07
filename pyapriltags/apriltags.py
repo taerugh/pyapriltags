@@ -164,6 +164,7 @@ class Detection(NamedTuple):
     pose_R: Optional[numpy.ndarray] = None
     pose_t: Optional[numpy.ndarray] = None
     pose_err: Optional[float] = None
+    tag_size: Optional[float] = None
 
     def __str__(self):
         return ('Detection object:' +
@@ -425,6 +426,7 @@ class Detector(object):
                 pose_R = None
                 pose_t = None
                 pose_err = None
+                individual_tag_size = None
 
             detection = Detection(
                 tag_family=ctypes.string_at(tag.family.contents.name),
@@ -437,6 +439,7 @@ class Detector(object):
                 pose_R=pose_R,
                 pose_t=pose_t,
                 pose_err=pose_err,
+                tag_size=individual_tag_size,
             )
 
             # append this dict to the tag data array
