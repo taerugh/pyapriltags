@@ -15,7 +15,7 @@ Current maintainer: Will Barber
 import ctypes
 import os
 import sys
-from typing import List, Optional, NamedTuple
+from typing import Dict, List, Union, Optional, NamedTuple
 
 import numpy
 
@@ -350,7 +350,7 @@ class Detector(object):
 
     def detect(
         self, img: numpy.ndarray, estimate_tag_pose: bool=False,
-        camera_params: Optional[numpy.ndarray]=None, tag_size: Optional[float]=None,
+        camera_params: Optional[numpy.ndarray]=None, tag_size: Union[float, None, Dict[int, float]]=None,
     ) -> List[Detection]:
         """
         Run detectons on the provided image. The image must be a grayscale
@@ -389,28 +389,38 @@ class Detector(object):
                     raise Exception(
                         'tag_size must be provided to detect if estimate_tag_pose is set to True')
 
-                camera_fx, camera_fy, camera_cx, camera_cy = [c for c in camera_params]
+                if isinstance(tag_size, dict):
+                    individual_tag_size = tag_size.get(tag.id, 0)
+                else:
+                    individual_tag_size = tag_size
 
-                info = _ApriltagDetectionInfo(det=apriltag,
-                                              tagsize=tag_size,
-                                              fx=camera_fx,
-                                              fy=camera_fy,
-                                              cx=camera_cx,
-                                              cy=camera_cy)
-                pose = _ApriltagPose()
+                if individual_tag_size != 0:
+                    camera_fx, camera_fy, camera_cx, camera_cy = [c for c in camera_params]
 
-                self.libc.estimate_tag_pose.restype = ctypes.c_double
-                err = self.libc.estimate_tag_pose(ctypes.byref(info), ctypes.byref(pose))
+                    info = _ApriltagDetectionInfo(det=apriltag,
+                                                  tagsize=individual_tag_size,
+                                                  fx=camera_fx,
+                                                  fy=camera_fy,
+                                                  cx=camera_cx,
+                                                  cy=camera_cy)
+                    pose = _ApriltagPose()
 
-                pose_R = _matd_get_array(pose.R).copy()
-                pose_t = _matd_get_array(pose.t).copy()
-                pose_err = err
+                    self.libc.estimate_tag_pose.restype = ctypes.c_double
+                    err = self.libc.estimate_tag_pose(ctypes.byref(info), ctypes.byref(pose))
 
-                self.libc.matd_destroy.restype = None
-                self.libc.matd_destroy(pose.R)
+                    pose_R = _matd_get_array(pose.R).copy()
+                    pose_t = _matd_get_array(pose.t).copy()
+                    pose_err = err
 
-                self.libc.matd_destroy.restype = None
-                self.libc.matd_destroy(pose.t)
+                    self.libc.matd_destroy.restype = None
+                    self.libc.matd_destroy(pose.R)
+
+                    self.libc.matd_destroy.restype = None
+                    self.libc.matd_destroy(pose.t)
+                else:
+                    pose_R = None
+                    pose_t = None
+                    pose_err = None
             else:
                 pose_R = None
                 pose_t = None
