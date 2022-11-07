@@ -12,12 +12,10 @@ Apriltags 3 version: Aleksandar Petrov, Spring 2019
 Current maintainer: Andrea F. Daniele
 
 """
-from __future__ import division
-from __future__ import print_function
-
 import ctypes
 import os
 import sys
+from typing import Optional, NamedTuple
 
 import numpy
 
@@ -152,22 +150,20 @@ def zarray_get(za, idx, ptr):
 
 ######################################################################
 
-class Detection():
+class Detection(NamedTuple):
     """
     Combined pythonic wrapper for apriltag_detection and apriltag_pose
     """
-
-    def __init__(self):
-        self.tag_family = None
-        self.tag_id = None
-        self.hamming = None
-        self.decision_margin = None
-        self.homography = None
-        self.center = None
-        self.corners = None
-        self.pose_R = None
-        self.pose_t = None
-        self.pose_err = None
+    tag_family: bytes
+    tag_id: int
+    hamming: int
+    decision_margin: float
+    homography: numpy.ndarray
+    center: numpy.ndarray
+    corners: numpy.ndarray
+    pose_R: Optional[numpy.ndarray] = None
+    pose_t: Optional[numpy.ndarray] = None
+    pose_err: Optional[float] = None
 
     def __str__(self):
         return ('Detection object:' +
@@ -382,15 +378,6 @@ class Detector(object):
             center = numpy.ctypeslib.as_array(tag.c, shape=(2,)).copy()
             corners = numpy.ctypeslib.as_array(tag.p, shape=(4, 2)).copy()
 
-            detection = Detection()
-            detection.tag_family = ctypes.string_at(tag.family.contents.name)
-            detection.tag_id = tag.id
-            detection.hamming = tag.hamming
-            detection.decision_margin = tag.decision_margin
-            detection.homography = homography
-            detection.center = center
-            detection.corners = corners
-
             if estimate_tag_pose:
                 if camera_params == None:
                     raise Exception(
@@ -412,15 +399,32 @@ class Detector(object):
                 self.libc.estimate_tag_pose.restype = ctypes.c_double
                 err = self.libc.estimate_tag_pose(ctypes.byref(info), ctypes.byref(pose))
 
-                detection.pose_R = _matd_get_array(pose.R).copy()
-                detection.pose_t = _matd_get_array(pose.t).copy()
-                detection.pose_err = err
+                pose_R = _matd_get_array(pose.R).copy()
+                pose_t = _matd_get_array(pose.t).copy()
+                pose_err = err
 
                 self.libc.matd_destroy.restype = None
                 self.libc.matd_destroy(pose.R)
 
                 self.libc.matd_destroy.restype = None
                 self.libc.matd_destroy(pose.t)
+            else:
+                pose_R = None
+                pose_t = None
+                pose_err = None
+
+            detection = Detection(
+                tag_family=ctypes.string_at(tag.family.contents.name),
+                tag_id=tag.id,
+                hamming=tag.hamming,
+                decision_margin=tag.decision_margin,
+                homography=homography,
+                center=center,
+                corners=corners,
+                pose_R=pose_R,
+                pose_t=pose_t,
+                pose_err=pose_err,
+            )
 
             # append this dict to the tag data array
             return_info.append(detection)
