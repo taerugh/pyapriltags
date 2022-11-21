@@ -15,7 +15,7 @@ Current maintainer: Will Barber
 import ctypes
 import os
 import sys
-from typing import Any, Dict, List, Union, Optional, NamedTuple
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import numpy
 
