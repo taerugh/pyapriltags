@@ -170,6 +170,7 @@ class Detection(NamedTuple):
         return ('Detection object:' +
                 '\ntag_family = ' + str(self.tag_family) +
                 '\ntag_id = ' + str(self.tag_id) +
+                '\ntag_size = ' + str(self.tag_size) +
                 '\nhamming = ' + str(self.hamming) +
                 '\ndecision_margin = ' + str(self.decision_margin) +
                 '\nhomography = ' + str(self.homography) +
