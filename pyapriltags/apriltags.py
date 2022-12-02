@@ -15,7 +15,7 @@ Current maintainer: Will Barber
 import ctypes
 import os
 import sys
-from typing import Any, Dict, List, Union, Optional, NamedTuple
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import numpy
 
@@ -189,21 +189,28 @@ class Detector(object):
     """
     Pythonic wrapper for apriltag_detector.
 
-    families: Tag families, separated with a space, default: tag36h11
-
-    nthreads: Number of threads, default: 1
-
-    quad_decimate: Detection of quads can be done on a lower-resolution image, improving speed at a cost of pose accuracy and a slight decrease in detection rate. Decoding the binary payload is still done at full resolution, default: 2.0
-
-    quad_sigma: What Gaussian blur should be applied to the segmented image (used for quad detection?)  Parameter is the standard deviation in pixels.  Very noisy images benefit from non-zero values (e.g. 0.8), default:  0.0
-
-    refine_edges: When non-zero, the edges of the each quad are adjusted to "snap to" strong gradients nearby. This is useful when decimation is employed, as it can increase the quality of the initial quad estimate substantially. Generally recommended to be on (1). Very computationally inexpensive. Option is ignored if quad_decimate = 1, default: 1
-
-    decode_sharpening: How much sharpening should be done to decoded images? This can help decode small tags but may or may not help in odd lighting conditions or low light conditions, default = 0.25
-
-    searchpath: Where to look for the Apriltag 3 library, must be a list, default: ['apriltags']
-
-    debug: If 1, will save debug images. Runs very slow, default: 0
+    families:           Tag families, separated with a space, default: tag36h11
+    nthreads:           Number of threads, default: 1
+    quad_decimate:      Detection of quads can be done on a lower-resolution image, improving
+                        speed at a cost of pose accuracy and a slight decrease in detection
+                        rate. Decoding the binary payload is still done at full resolution,
+                        default: 2.0
+    quad_sigma:         What Gaussian blur should be applied to the segmented image (used for
+                        quad detection?)  Parameter is the standard deviation in pixels.
+                        Very noisy images benefit from non-zero values (e.g. 0.8),
+                        default: 0.0
+    refine_edges:       When non-zero, the edges of the each quad are adjusted to "snap to"
+                        strong gradients nearby. This is useful when decimation is employed,
+                        as it can increase the quality of the initial quad estimate
+                        substantially. Generally recommended to be on (1). Very
+                        computationally inexpensive. Option is ignored if quad_decimate = 1,
+                        default: 1
+    decode_sharpening:  How much sharpening should be done to decoded images? This can help
+                        decode small tags but may or may not help in odd lighting conditions
+                        or low light conditions, default = 0.25
+    searchpath:         Where to look for the Apriltag 3 library, must be a list,
+                        default: ['apriltags']
+    debug:              If 1, will save debug images. Runs very slow, default: 0
     """
 
     def __init__(self,
@@ -268,52 +275,53 @@ class Detector(object):
         if 'tag16h5' in self.params['families']:
             self.libc.tag16h5_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tag16h5'] = self.libc.tag16h5_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tag16h5'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tag16h5'], 2)
         elif 'tag25h9' in self.params['families']:
             self.libc.tag25h9_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tag25h9'] = self.libc.tag25h9_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tag25h9'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tag25h9'], 2)
         elif 'tag36h11' in self.params['families']:
             self.libc.tag36h11_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tag36h11'] = self.libc.tag36h11_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tag36h11'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tag36h11'], 2)
         elif 'tagCircle21h7' in self.params['families']:
             self.libc.tagCircle21h7_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tagCircle21h7'] = self.libc.tagCircle21h7_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tagCircle21h7'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tagCircle21h7'], 2)
         elif 'tagCircle49h12' in self.params['families']:
             self.libc.tagCircle49h12_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tagCircle49h12'] = self.libc.tagCircle49h12_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tagCircle49h12'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tagCircle49h12'], 2)
         elif 'tagCustom48h12' in self.params['families']:
             self.libc.tagCustom48h12_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tagCustom48h12'] = self.libc.tagCustom48h12_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tagCustom48h12'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tagCustom48h12'], 2)
         elif 'tagStandard41h12' in self.params['families']:
             self.libc.tagStandard41h12_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tagStandard41h12'] = self.libc.tagStandard41h12_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tagStandard41h12'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tagStandard41h12'], 2)
         elif 'tagStandard52h13' in self.params['families']:
             self.libc.tagStandard52h13_create.restype = ctypes.POINTER(_ApriltagFamily)
             self.tag_families['tagStandard52h13'] = self.libc.tagStandard52h13_create()
-            self.libc.apriltag_detector_add_family_bits(self.tag_detector_ptr,
-                                                        self.tag_families['tagStandard52h13'], 2)
+            self.libc.apriltag_detector_add_family_bits(
+                self.tag_detector_ptr, self.tag_families['tagStandard52h13'], 2)
         else:
-            raise Exception('Unrecognized tag family name. Use e.g. \'tag36h11\'.\n')
+            raise Exception(
+                'Unrecognized tag family name. Use e.g. \'tag36h11\'.\n')
 
         # configure the parameters of the detector
         self.tag_detector_ptr.contents.nthreads = int(self.params['nthreads'])
         self.tag_detector_ptr.contents.quad_decimate = float(self.params['quad_decimate'])
         self.tag_detector_ptr.contents.quad_sigma = float(self.params['quad_sigma'])
         self.tag_detector_ptr.contents.refine_edges = int(self.params['refine_edges'])
-        self.tag_detector_ptr.contents.decode_sharpening = int(self.params['decode_sharpening'])
+        self.tag_detector_ptr.contents.decode_sharpening = int(self.params['decode_sharpening'])  # noqa: E501
         self.tag_detector_ptr.contents.debug = int(self.params['debug'])
 
     def __del__(self):
@@ -351,7 +359,8 @@ class Detector(object):
 
     def detect(
         self, img: numpy.ndarray, estimate_tag_pose: bool = False,
-        camera_params: Optional[numpy.ndarray] = None, tag_size: Union[float, None, Dict[int, float]] = None,
+        camera_params: Optional[numpy.ndarray] = None,
+        tag_size: Union[float, None, Dict[int, float]] = None,
     ) -> List[Detection]:
         """
         Run detectons on the provided image. The image must be a grayscale
@@ -380,18 +389,19 @@ class Detector(object):
 
             tag = apriltag.contents
 
-            homography = _matd_get_array(
-                tag.H).copy()  # numpy.zeros((3,3))  # Don't ask questions, move on with your life
+            homography = _matd_get_array(tag.H).copy()
             center = numpy.ctypeslib.as_array(tag.c, shape=(2,)).copy()
             corners = numpy.ctypeslib.as_array(tag.p, shape=(4, 2)).copy()
 
             if estimate_tag_pose:
                 if camera_params is None:
                     raise Exception(
-                        'camera_params must be provided to detect if estimate_tag_pose is set to True')
+                        'camera_params must be provided to detect if estimate_tag_pose is '
+                        'set to True')
                 if tag_size is None:
                     raise Exception(
-                        'tag_size must be provided to detect if estimate_tag_pose is set to True')
+                        'tag_size must be provided to detect if estimate_tag_pose is set to '
+                        'True')
 
                 if isinstance(tag_size, dict):
                     individual_tag_size = tag_size.get(tag.id, 0)
