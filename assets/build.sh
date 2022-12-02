@@ -12,16 +12,16 @@ COMMON_CMAKE_ARGS="-DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX
 
 do_compile() {
     printf "\n>>> BUILDING APRILTAG for $1\n"
-    cd /builds/$1
+    cd /builds/$1 || return
     cmake $4 \
         -DCMAKE_C_COMPILER=$2 -DCMAKE_CXX_COMPILER=$3 \
-        $COMMON_CMAKE_ARGS /apriltag/apriltags
-    cmake --build . --config Release
+        $COMMON_CMAKE_ARGS /apriltag/apriltags || return
+    cmake --build . --config Release || return
     cp -L libapriltag.* /dist/$1
 }
 
 build_wheel() {
-    cp /dist/$1/$2 pyapriltags/
+    cp /dist/$1/$2 pyapriltags/ || return
     pip wheel --wheel-dir /out --no-deps --build-option=--plat-name=$3 .
     rm -rf build/lib  # remove cached shared libraries
     rm pyapriltags/$2

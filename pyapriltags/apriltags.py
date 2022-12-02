@@ -15,7 +15,7 @@ Current maintainer: Will Barber
 import ctypes
 import os
 import sys
-from typing import Dict, List, Union, Optional, NamedTuple
+from typing import Any, Dict, List, Union, Optional, NamedTuple
 
 import numpy
 
@@ -164,6 +164,7 @@ class Detection(NamedTuple):
     pose_R: Optional[numpy.ndarray] = None
     pose_t: Optional[numpy.ndarray] = None
     pose_err: Optional[float] = None
+    tag_size: Optional[float] = None
 
     def __str__(self):
         return ('Detection object:' +
@@ -206,17 +207,17 @@ class Detector(object):
     """
 
     def __init__(self,
-                 families: str='tag36h11',
-                 nthreads: int=1,
-                 quad_decimate: float=2.0,
-                 quad_sigma: float=0.0,
-                 refine_edges: int=1,
-                 decode_sharpening: float=0.25,
-                 debug: int=0,
-                 searchpath: List[str]=['apriltags', '.', dir_path]):
+                 families: str = 'tag36h11',
+                 nthreads: int = 1,
+                 quad_decimate: float = 2.0,
+                 quad_sigma: float = 0.0,
+                 refine_edges: int = 1,
+                 decode_sharpening: float = 0.25,
+                 debug: int = 0,
+                 searchpath: List[str] = ['apriltags', '.', dir_path]):
 
         # Parse the parameters
-        self.params = dict()
+        self.params: Dict[str, Any] = dict()
         self.params['families'] = families.split()
         self.params['nthreads'] = nthreads
         self.params['quad_decimate'] = quad_decimate
@@ -349,8 +350,8 @@ class Detector(object):
                     self.libc.tagStandard52h13_destroy(tf)
 
     def detect(
-        self, img: numpy.ndarray, estimate_tag_pose: bool=False,
-        camera_params: Optional[numpy.ndarray]=None, tag_size: Union[float, None, Dict[int, float]]=None,
+        self, img: numpy.ndarray, estimate_tag_pose: bool = False,
+        camera_params: Optional[numpy.ndarray] = None, tag_size: Union[float, None, Dict[int, float]] = None,
     ) -> List[Detection]:
         """
         Run detectons on the provided image. The image must be a grayscale
@@ -362,6 +363,9 @@ class Detector(object):
         c_img = self._convert_image(img)
 
         return_info = []
+
+        if self.libc is None:
+            raise RuntimeError('No DLL found')
 
         # detect apriltags in the image
         self.libc.apriltag_detector_detect.restype = ctypes.POINTER(_ZArray)
@@ -425,6 +429,7 @@ class Detector(object):
                 pose_R = None
                 pose_t = None
                 pose_err = None
+                individual_tag_size = None
 
             detection = Detection(
                 tag_family=ctypes.string_at(tag.family.contents.name),
@@ -437,6 +442,7 @@ class Detector(object):
                 pose_R=pose_R,
                 pose_t=pose_t,
                 pose_err=pose_err,
+                tag_size=individual_tag_size,
             )
 
             # append this dict to the tag data array
