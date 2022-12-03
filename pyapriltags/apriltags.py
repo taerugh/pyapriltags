@@ -15,7 +15,7 @@ Current maintainer: Will Barber
 import ctypes
 import os
 import sys
-from typing import Any, Dict, List, NamedTuple, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 import numpy
 
@@ -360,7 +360,7 @@ class Detector(object):
 
     def detect(
         self, img: numpy.ndarray, estimate_tag_pose: bool = False,
-        camera_params: Optional[numpy.ndarray] = None,
+        camera_params: Union[numpy.ndarray, Tuple[float, float, float, float], None] = None,
         tag_size: Union[float, None, Dict[int, float]] = None,
     ) -> List[Detection]:
         """
