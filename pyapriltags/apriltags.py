@@ -64,8 +64,8 @@ class _ApriltagFamily(ctypes.Structure):
         ('total_width', ctypes.c_int),
         ('reversed_border', ctypes.c_bool),
         ('nbits', ctypes.c_uint32),
-        ('bit_x', ctypes.POINTER(ctypes.c_uint32)),
-        ('bit_y', ctypes.POINTER(ctypes.c_uint32)),
+        ('bit_x', ctypes.POINTER(ctypes.c_int32)),
+        ('bit_y', ctypes.POINTER(ctypes.c_int32)),
         ('h', ctypes.c_int32),
         ('name', ctypes.c_char_p),
     ]
