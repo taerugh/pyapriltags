@@ -214,6 +214,17 @@ class Detector(object):
     debug:              If 1, will save debug images. Runs very slow, default: 0
     """
 
+    _SUPPORTED_FAMILIES = (
+        'tag16h5',
+        'tag25h9',
+        'tag36h11'
+        'tagCircle21h7',
+        'tagCircle49h12',
+        'tagCustom48h12',
+        'tagStandard41h12',
+        'tagStandard52h13',
+    )
+
     def __init__(self,
                  families: str = 'tag36h11',
                  nthreads: int = 1,
@@ -274,41 +285,18 @@ class Detector(object):
 
         # create the family
         self.tag_families = dict()
-        if 'tag16h5' in self.params['families']:
-            self.tag_families['tag16h5'] = self.libc.tag16h5_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tag16h5'], 2)
-        elif 'tag25h9' in self.params['families']:
-            self.tag_families['tag25h9'] = self.libc.tag25h9_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tag25h9'], 2)
-        elif 'tag36h11' in self.params['families']:
-            self.tag_families['tag36h11'] = self.libc.tag36h11_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tag36h11'], 2)
-        elif 'tagCircle21h7' in self.params['families']:
-            self.tag_families['tagCircle21h7'] = self.libc.tagCircle21h7_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tagCircle21h7'], 2)
-        elif 'tagCircle49h12' in self.params['families']:
-            self.tag_families['tagCircle49h12'] = self.libc.tagCircle49h12_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tagCircle49h12'], 2)
-        elif 'tagCustom48h12' in self.params['families']:
-            self.tag_families['tagCustom48h12'] = self.libc.tagCustom48h12_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tagCustom48h12'], 2)
-        elif 'tagStandard41h12' in self.params['families']:
-            self.tag_families['tagStandard41h12'] = self.libc.tagStandard41h12_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tagStandard41h12'], 2)
-        elif 'tagStandard52h13' in self.params['families']:
-            self.tag_families['tagStandard52h13'] = self.libc.tagStandard52h13_create()
-            self.libc.apriltag_detector_add_family_bits(
-                self.tag_detector_ptr, self.tag_families['tagStandard52h13'], 2)
-        else:
-            raise Exception(
-                'Unrecognized tag family name. Use e.g. \'tag36h11\'.\n')
+        for family in self.params['families']:
+            if family in self._SUPPORTED_FAMILIES:
+                # Call the family's create method
+                self.tag_families[family] = getattr(self.libc, f'{family}_create')()
+                self.libc.apriltag_detector_add_family_bits(
+                    self.tag_detector_ptr,
+                    self.tag_families[family],
+                    2,
+                )
+            else:
+                raise Exception(
+                    'Unrecognized tag family name. Use e.g. \'tag36h11\'.\n')
 
         # configure the parameters of the detector
         self.tag_detector_ptr.contents.nthreads = int(self.params['nthreads'])
@@ -325,25 +313,10 @@ class Detector(object):
         self.libc.apriltag_detector_add_family_bits.restype = None
         self.libc.apriltag_detector_destroy.restype = None
 
-        # Tag family constructors
-        self.libc.tag16h5_create.restype = ctypes.POINTER(_ApriltagFamily)
-        self.libc.tag25h9_create.restype = ctypes.POINTER(_ApriltagFamily)
-        self.libc.tag36h11_create.restype = ctypes.POINTER(_ApriltagFamily)
-        self.libc.tagCircle21h7_create.restype = ctypes.POINTER(_ApriltagFamily)
-        self.libc.tagCircle49h12_create.restype = ctypes.POINTER(_ApriltagFamily)
-        self.libc.tagCustom48h12_create.restype = ctypes.POINTER(_ApriltagFamily)
-        self.libc.tagStandard41h12_create.restype = ctypes.POINTER(_ApriltagFamily)
-        self.libc.tagStandard52h13_create.restype = ctypes.POINTER(_ApriltagFamily)
-
-        # Tag family destructors
-        self.libc.tag16h5_destroy.restype = None
-        self.libc.tag25h9_destroy.restype = None
-        self.libc.tag36h11_destroy.restype = None
-        self.libc.tagCircle21h7_destroy.restype = None
-        self.libc.tagCircle49h12_destroy.restype = None
-        self.libc.tagCustom48h12_destroy.restype = None
-        self.libc.tagStandard41h12_destroy.restype = None
-        self.libc.tagStandard52h13_destroy.restype = None
+        # Tag family constructors and destructors
+        for family in self._SUPPORTED_FAMILIES:
+            getattr(self.libc, f'{family}_create').restype = ctypes.POINTER(_ApriltagFamily)
+            getattr(self.libc, f'{family}_destroy').restype = None
 
         # Functions used by detect()
         self.libc.apriltag_detector_detect.restype = ctypes.POINTER(_ZArray)
@@ -361,22 +334,9 @@ class Detector(object):
 
             # destroy the tag families
             for family, tf in self.tag_families.items():
-                if 'tag16h5' == family:
-                    self.libc.tag16h5_destroy(tf)
-                elif 'tag25h9' == family:
-                    self.libc.tag25h9_destroy(tf)
-                elif 'tag36h11' == family:
-                    self.libc.tag36h11_destroy(tf)
-                elif 'tagCircle21h7' == family:
-                    self.libc.tagCircle21h7_destroy(tf)
-                elif 'tagCircle49h12' == family:
-                    self.libc.tagCircle49h12_destroy(tf)
-                elif 'tagCustom48h12' == family:
-                    self.libc.tagCustom48h12_destroy(tf)
-                elif 'tagStandard41h12' == family:
-                    self.libc.tagStandard41h12_destroy(tf)
-                elif 'tagStandard52h13' == family:
-                    self.libc.tagStandard52h13_destroy(tf)
+                if family in self._SUPPORTED_FAMILIES:
+                    # Call the family's destroy method
+                    getattr(self.libc, f'{family}_destroy')(tf)
 
     def detect(
         self, img: numpy.ndarray, estimate_tag_pose: bool = False,
