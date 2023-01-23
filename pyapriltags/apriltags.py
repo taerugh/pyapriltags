@@ -217,7 +217,7 @@ class Detector(object):
     _SUPPORTED_FAMILIES = (
         'tag16h5',
         'tag25h9',
-        'tag36h11'
+        'tag36h11',
         'tagCircle21h7',
         'tagCircle49h12',
         'tagCustom48h12',
