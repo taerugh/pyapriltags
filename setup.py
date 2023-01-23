@@ -3,7 +3,7 @@ from pathlib import Path
 
 from setuptools import setup
 
-POSTFIX = '.post2'
+POSTFIX = '.2'
 
 version = minidom.parse('apriltags/package.xml').getElementsByTagName("version")[0].childNodes[0].data
 
