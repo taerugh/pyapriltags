@@ -223,6 +223,7 @@ class Detector(object):
         'tagCustom48h12',
         'tagStandard41h12',
         'tagStandard52h13',
+        'tagTowel52h11',
     )
 
     def __init__(self,
